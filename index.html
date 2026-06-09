@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hoy en el Calendario Lunar</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:radial-gradient(circle at 50% -20%,#243056,#0a0e1c 65%);
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;color:#eef1f7;}
+  .card{width:100%;max-width:420px;background:rgba(20,26,46,.85);
+    border:1px solid rgba(232,200,121,.25);border-radius:24px;padding:38px 30px;text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,.45);backdrop-filter:blur(6px);}
+  .phase{font-size:88px;line-height:1;margin-bottom:10px;}
+  .luna{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#e8c879;margin-bottom:6px;}
+  .name{font-size:30px;font-weight:700;margin-bottom:22px;}
+  .day{font-size:66px;font-weight:800;color:#e8c879;line-height:1;}
+  .daylbl{font-size:12px;color:#8b93a7;margin-top:6px;letter-spacing:.5px;}
+  .week{margin-top:22px;display:inline-block;padding:8px 18px;border-radius:999px;
+    background:rgba(232,200,121,.12);border:1px solid rgba(232,200,121,.3);font-size:14px;}
+  .energy{margin-top:14px;font-size:15px;color:#c7cddd;}
+  .divider{height:1px;background:rgba(255,255,255,.08);margin:26px 0 16px;}
+  .greg{font-size:12px;color:#9aa3b8;}
+  .next{font-size:11px;color:#6f7890;margin-top:8px;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="phase" id="phase">🌘</div>
+    <div class="luna" id="lunaNum">Luna</div>
+    <div class="name" id="lunaName">—</div>
+    <div class="day" id="dayNum">—</div>
+    <div class="daylbl">día de la luna (de 28)</div>
+    <div class="week" id="week">—</div>
+    <div class="energy" id="energy">—</div>
+    <div class="divider"></div>
+    <div class="greg" id="greg">—</div>
+    <div class="next" id="next">—</div>
+  </div>
+<script>
+(function(){
+  const SYN = 29.53058867;                         // mes sinódico (días)
+  const REF = Date.UTC(2000,0,6,18,14,0)/86400000; // luna nueva de referencia
+  const NAMES = ["Luna del Despertar","Luna de la Siembra","Luna de la Flor",
+    "Luna del Sol Alto","Luna de la Maduración","Luna de la Cosecha",
+    "Luna del Equilibrio","Luna de las Hojas","Luna de la Niebla",
+    "Luna del Reposo","Luna del Hielo","Luna del Deshielo","Luna del Umbral"];
+  const PHASES = [
+    {max:1.85,  e:"🌑", n:"Nueva"},
+    {max:5.54,  e:"🌒", n:"Creciente"},
+    {max:9.23,  e:"🌓", n:"Cuarto creciente"},
+    {max:12.91, e:"🌔", n:"Gibosa creciente"},
+    {max:16.61, e:"🌕", n:"Llena"},
+    {max:20.30, e:"🌖", n:"Gibosa menguante"},
+    {max:23.99, e:"🌗", n:"Cuarto menguante"},
+    {max:27.68, e:"🌘", n:"Menguante"},
+    {max:30,    e:"🌑", n:"Nueva"}
+  ];
+  const ENERGY = [
+    "🌑 Sembrar — fijar intención e iniciar",
+    "🌓 Construir — foco máximo y trabajo profundo",
+    "🌕 Cosechar — completar, entregar, compartir",
+    "🌗 Soltar — revisar, ordenar y descansar"
+  ];
+  function moonAge(d){ let n=(d.getTime()/86400000-REF)/SYN; return (n-Math.floor(n))*SYN; }
+  function newMoonIdx(d){ return Math.floor((d.getTime()/86400000-REF)/SYN); }
+  function equinoxIdx(y){ let eq=Date.UTC(y,2,20)/86400000; return Math.round((eq-REF)/SYN); }
+  function nextNewMoon(d){ let n=Math.ceil((d.getTime()/86400000-REF)/SYN); return new Date((REF+n*SYN)*86400000); }
+  function phaseFor(age){ for(const p of PHASES){ if(age<p.max) return p; } return PHASES[PHASES.length-1]; }
+  function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+  function render(){
+    const now = new Date();
+    const age = moonAge(now);
+    const day = Math.min(28, Math.floor(age)+1);
+    const week = Math.min(4, Math.floor((day-1)/7)+1);
+    let idx = newMoonIdx(now), y = now.getFullYear(), anchor = equinoxIdx(y);
+    if(idx < anchor){ y--; anchor = equinoxIdx(y); }
+    const lunaI = ((idx-anchor)%13+13)%13;
+    const ph = phaseFor(age);
+    document.getElementById("phase").textContent    = ph.e;
+    document.getElementById("lunaNum").textContent  = "Luna " + (lunaI+1);
+    document.getElementById("lunaName").textContent = NAMES[lunaI];
+    document.getElementById("dayNum").textContent   = day;
+    document.getElementById("week").textContent     = "Semana " + week + " · " + ph.n;
+    document.getElementById("energy").textContent   = ENERGY[week-1];
+    const fmt = now.toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+    document.getElementById("greg").textContent     = "📅 " + cap(fmt);
+    const nn = nextNewMoon(now);
+    document.getElementById("next").textContent     = "Próxima luna nueva: " + nn.toLocaleDateString("es-ES",{day:"numeric",month:"long"});
+  }
+  render();
+  setInterval(render, 60000); // se refresca cada minuto
+})();
+</script>
+</body>
+</html>
