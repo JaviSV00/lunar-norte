@@ -1,96 +1,133 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang='es'>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hoy en el Calendario Lunar</title>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<title>Calendario Lunar — Año completo</title>
 <style>
+  :root{--bg:#0a0e1c;--card:#141a2e;--gold:#e8c879;--txt:#eef1f7;--muted:#8b93a7;
+    --w1:#5bbf8a;--w2:#5b8def;--w3:#e8c879;--w4:#b07cd9;--free:#ff8fb1;}
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    background:radial-gradient(circle at 50% -20%,#243056,#0a0e1c 65%);
-    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;color:#eef1f7;}
-  .card{width:100%;max-width:420px;background:rgba(20,26,46,.85);
-    border:1px solid rgba(232,200,121,.25);border-radius:24px;padding:38px 30px;text-align:center;
-    box-shadow:0 20px 60px rgba(0,0,0,.45);backdrop-filter:blur(6px);}
-  .phase{font-size:88px;line-height:1;margin-bottom:10px;}
-  .luna{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#e8c879;margin-bottom:6px;}
-  .name{font-size:30px;font-weight:700;margin-bottom:22px;}
-  .day{font-size:66px;font-weight:800;color:#e8c879;line-height:1;}
-  .daylbl{font-size:12px;color:#8b93a7;margin-top:6px;letter-spacing:.5px;}
-  .week{margin-top:22px;display:inline-block;padding:8px 18px;border-radius:999px;
-    background:rgba(232,200,121,.12);border:1px solid rgba(232,200,121,.3);font-size:14px;}
-  .energy{margin-top:14px;font-size:15px;color:#c7cddd;}
-  .divider{height:1px;background:rgba(255,255,255,.08);margin:26px 0 16px;}
-  .greg{font-size:12px;color:#9aa3b8;}
-  .next{font-size:11px;color:#6f7890;margin-top:8px;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    background:radial-gradient(circle at 50% -10%,#1c2545,#0a0e1c 60%);min-height:100vh;color:var(--txt);padding:28px 16px 60px;}
+  .wrap{max-width:1080px;margin:0 auto;}
+  h1{font-size:24px;font-weight:800;text-align:center;letter-spacing:.3px;}
+  .sub{text-align:center;color:var(--muted);font-size:12px;margin-top:6px;}
+  .today-card{max-width:540px;margin:18px auto 26px;background:var(--card);border:1px solid rgba(232,200,121,.3);
+    border-radius:18px;padding:18px 22px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.4);}
+  .today-card .ph{font-size:42px;}
+  .today-card .nm{font-size:20px;font-weight:700;margin-top:2px;}
+  .today-card .meta{font-size:12px;color:var(--muted);margin-top:6px;}
+  .today-card .en{font-size:14px;color:#c7cddd;margin-top:8px;}
+  .year{display:flex;flex-direction:column;gap:16px;}
+  .row{display:grid;gap:16px;}
+  .row.r4{grid-template-columns:repeat(4,1fr);}
+  .row.r5{grid-template-columns:repeat(5,1fr);}
+  .moon{background:var(--card);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:12px;}
+  .moon h3{font-size:12px;font-weight:700;margin-bottom:2px;}
+  .moon .mo-sub{font-size:10px;color:var(--muted);margin-bottom:8px;min-height:13px;}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+  .cell{position:relative;aspect-ratio:1;border-radius:5px;display:flex;align-items:center;justify-content:center;
+    font-size:10px;color:#dfe3ee;border:1px solid transparent;}
+  .w1{background:rgba(91,191,138,.18);} .w2{background:rgba(91,141,239,.18);}
+  .w3{background:rgba(232,200,121,.18);} .w4{background:rgba(176,124,217,.20);}
+  .cell.today{outline:2px solid var(--gold);box-shadow:0 0 0 3px rgba(232,200,121,.25);font-weight:800;color:#fff;cursor:pointer;z-index:3;}
+  .freeday{margin-top:4px;display:flex;align-items:center;gap:12px;justify-content:center;
+    background:rgba(255,143,177,.12);border:1px dashed var(--free);border-radius:12px;padding:12px 16px;}
+  .freeday .fc{width:32px;height:32px;border-radius:8px;background:rgba(255,143,177,.32);
+    display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;}
+  .freeday .ft{font-size:12px;color:#f3c4d3;}
+  .tip{position:absolute;bottom:135%;left:50%;transform:translateX(-50%) scale(.96);width:220px;
+    background:#0f1426;border:1px solid var(--gold);border-radius:12px;padding:12px 14px;text-align:left;
+    opacity:0;pointer-events:none;transition:.15s;z-index:30;box-shadow:0 14px 40px rgba(0,0,0,.6);}
+  .cell.today:hover .tip{opacity:1;transform:translateX(-50%) scale(1);}
+  .tip b{color:var(--gold);font-size:13px;}
+  .tip .r{font-size:11px;color:#c7cddd;margin-top:4px;}
+  .tip:after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+    border:6px solid transparent;border-top-color:var(--gold);}
+  .legends{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:30px;}
+  .lg{background:var(--card);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:16px 18px;}
+  .lg h2{font-size:14px;margin-bottom:12px;color:var(--gold);}
+  .item{display:flex;gap:10px;align-items:flex-start;margin-bottom:11px;font-size:12px;line-height:1.45;}
+  .dot{width:14px;height:14px;border-radius:4px;flex:0 0 14px;margin-top:2px;}
+  .season{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin:12px 0 7px;}
+  @media(max-width:760px){.legends{grid-template-columns:1fr;}.row.r4,.row.r5{grid-template-columns:repeat(2,1fr);}}
 </style>
 </head>
 <body>
-  <div class="card">
-    <div class="phase" id="phase">🌘</div>
-    <div class="luna" id="lunaNum">Luna</div>
-    <div class="name" id="lunaName">—</div>
-    <div class="day" id="dayNum">—</div>
-    <div class="daylbl">día de la luna (de 28)</div>
-    <div class="week" id="week">—</div>
-    <div class="energy" id="energy">—</div>
-    <div class="divider"></div>
-    <div class="greg" id="greg">—</div>
-    <div class="next" id="next">—</div>
+<div class='wrap'>
+  <h1>🌙 Calendario Lunar · Año completo</h1>
+  <div class='sub' id='yearRange'>—</div>
+  <div class='today-card'>
+    <div class='ph' id='tPh'>🌘</div>
+    <div class='nm' id='tNm'>—</div>
+    <div class='meta' id='tMeta'>—</div>
+    <div class='en' id='tEn'>—</div>
   </div>
+  <div class='year' id='year'></div>
+  <div class='legends'>
+    <div class='lg' id='lgLunas'></div>
+    <div class='lg' id='lgWeeks'></div>
+  </div>
+</div>
 <script>
 (function(){
-  const SYN = 29.53058867;                         // mes sinódico (días)
-  const REF = Date.UTC(2000,0,6,18,14,0)/86400000; // luna nueva de referencia
-  const NAMES = ["Luna del Despertar","Luna de la Siembra","Luna de la Flor",
-    "Luna del Sol Alto","Luna de la Maduración","Luna de la Cosecha",
-    "Luna del Equilibrio","Luna de las Hojas","Luna de la Niebla",
-    "Luna del Reposo","Luna del Hielo","Luna del Deshielo","Luna del Umbral"];
-  const PHASES = [
-    {max:1.85,  e:"🌑", n:"Nueva"},
-    {max:5.54,  e:"🌒", n:"Creciente"},
-    {max:9.23,  e:"🌓", n:"Cuarto creciente"},
-    {max:12.91, e:"🌔", n:"Gibosa creciente"},
-    {max:16.61, e:"🌕", n:"Llena"},
-    {max:20.30, e:"🌖", n:"Gibosa menguante"},
-    {max:23.99, e:"🌗", n:"Cuarto menguante"},
-    {max:27.68, e:"🌘", n:"Menguante"},
-    {max:30,    e:"🌑", n:"Nueva"}
-  ];
-  const ENERGY = [
-    "🌑 Sembrar — fijar intención e iniciar",
-    "🌓 Construir — foco máximo y trabajo profundo",
-    "🌕 Cosechar — completar, entregar, compartir",
-    "🌗 Soltar — revisar, ordenar y descansar"
-  ];
-  function moonAge(d){ let n=(d.getTime()/86400000-REF)/SYN; return (n-Math.floor(n))*SYN; }
-  function newMoonIdx(d){ return Math.floor((d.getTime()/86400000-REF)/SYN); }
-  function equinoxIdx(y){ let eq=Date.UTC(y,2,20)/86400000; return Math.round((eq-REF)/SYN); }
-  function nextNewMoon(d){ let n=Math.ceil((d.getTime()/86400000-REF)/SYN); return new Date((REF+n*SYN)*86400000); }
-  function phaseFor(age){ for(const p of PHASES){ if(age<p.max) return p; } return PHASES[PHASES.length-1]; }
-  function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
-  function render(){
-    const now = new Date();
-    const age = moonAge(now);
-    const day = Math.min(28, Math.floor(age)+1);
-    const week = Math.min(4, Math.floor((day-1)/7)+1);
-    let idx = newMoonIdx(now), y = now.getFullYear(), anchor = equinoxIdx(y);
-    if(idx < anchor){ y--; anchor = equinoxIdx(y); }
-    const lunaI = ((idx-anchor)%13+13)%13;
-    const ph = phaseFor(age);
-    document.getElementById("phase").textContent    = ph.e;
-    document.getElementById("lunaNum").textContent  = "Luna " + (lunaI+1);
-    document.getElementById("lunaName").textContent = NAMES[lunaI];
-    document.getElementById("dayNum").textContent   = day;
-    document.getElementById("week").textContent     = "Semana " + week + " · " + ph.n;
-    document.getElementById("energy").textContent   = ENERGY[week-1];
-    const fmt = now.toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
-    document.getElementById("greg").textContent     = "📅 " + cap(fmt);
-    const nn = nextNewMoon(now);
-    document.getElementById("next").textContent     = "Próxima luna nueva: " + nn.toLocaleDateString("es-ES",{day:"numeric",month:"long"});
-  }
-  render();
-  setInterval(render, 60000); // se refresca cada minuto
+  const SYN=29.53058867;
+  const REF=Date.UTC(2000,0,6,18,14,0)/86400000;
+  const NAMES=['Luna del Despertar','Luna de la Siembra','Luna de la Flor','Luna del Sol Alto','Luna de la Maduración','Luna de la Cosecha','Luna del Equilibrio','Luna de las Hojas','Luna de la Niebla','Luna del Reposo','Luna del Hielo','Luna del Deshielo','Luna del Umbral'];
+  const ANCHORS={0:'Equinoccio de primavera',3:'Solsticio de verano',6:'Equinoccio de otoño',9:'Solsticio de invierno',12:'Cierre del ciclo'};
+  const HINT=['Arranques y comienzos. Energía fresca para iniciar.','Plantar proyectos y nuevos hábitos.','Expansión, relaciones y mostrar tu trabajo.','Máxima energía: aborda los grandes esfuerzos.','Perseverar y refinar lo empezado.','Recoger resultados y cerrar entregas.','Revisar, reorganizar y equilibrar áreas.','Soltar lo que sobra; simplificar.','Introspección y planificar el futuro.','Descanso profundo; recargar pilas.','Foco interno, estrategia y estudio.','Preparar el nuevo ciclo; despertar lento.','Cerrar el año: gratitud y limpieza.'];
+  const PHASES=[{max:1.85,e:'🌑',n:'Nueva'},{max:5.54,e:'🌒',n:'Creciente'},{max:9.23,e:'🌓',n:'Cuarto creciente'},{max:12.91,e:'🌔',n:'Gibosa creciente'},{max:16.61,e:'🌕',n:'Llena'},{max:20.30,e:'🌖',n:'Gibosa menguante'},{max:23.99,e:'🌗',n:'Cuarto menguante'},{max:27.68,e:'🌘',n:'Menguante'},{max:30,e:'🌑',n:'Nueva'}];
+  const WEEKS=[{cls:'w1',col:'#5bbf8a',name:'Semana 1 · Sembrar',phase:'🌑→🌒 Nueva a creciente',txt:'Fijar intención, planificar e iniciar lo importante.'},{cls:'w2',col:'#5b8def',name:'Semana 2 · Construir',phase:'🌓→🌔 Creciente a llena',txt:'Foco máximo y trabajo profundo. Empuja los proyectos.'},{cls:'w3',col:'#e8c879',name:'Semana 3 · Cosechar',phase:'🌕→🌖 Llena a menguante',txt:'Completar, entregar, publicar y celebrar.'},{cls:'w4',col:'#b07cd9',name:'Semana 4 · Soltar',phase:'🌗→🌑 Menguante a nueva',txt:'Revisar, ordenar, descansar y preparar la próxima luna.'}];
+  const SEASONS=[{t:'🌱 Primavera',ls:[0,1,2],col:'#5bbf8a'},{t:'☀️ Verano',ls:[3,4,5],col:'#e8c879'},{t:'🍂 Otoño',ls:[6,7,8],col:'#d98c5b'},{t:'❄️ Invierno',ls:[9,10,11],col:'#5b8def'},{t:'✨ Cierre',ls:[12],col:'#b07cd9'}];
+  const moonAge=d=>{let n=(d.getTime()/86400000-REF)/SYN;return (n-Math.floor(n))*SYN;};
+  const phaseFor=a=>{for(const p of PHASES){if(a<p.max)return p;}return PHASES[8];};
+  const springJD=y=>{const eq=Date.UTC(y,2,20,12)/86400000;const k=Math.round((eq-REF)/SYN);return REF+k*SYN;};
+  const fS=d=>d.toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+  const fL=d=>{let s=d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});return s.charAt(0).toUpperCase()+s.slice(1);};
+  const t0=new Date();const today=new Date(t0.getFullYear(),t0.getMonth(),t0.getDate());
+  let Y=today.getFullYear();let ajd=springJD(Y);
+  const tJD=Date.UTC(today.getFullYear(),today.getMonth(),today.getDate())/86400000;
+  if(tJD<ajd){Y--;ajd=springJD(Y);}
+  const am=new Date(ajd*86400000);const anchor=new Date(am.getUTCFullYear(),am.getUTCMonth(),am.getUTCDate());
+  const cell=i=>new Date(anchor.getFullYear(),anchor.getMonth(),anchor.getDate()+i);
+  const doy=Math.round((today-anchor)/86400000);
+  const isFree=doy>=364;
+  const cL=Math.floor(doy/28),cD=(doy%28)+1,cW=Math.floor((doy%28)/7)+1;
+  const realPh=phaseFor(moonAge(new Date()));
+  document.getElementById('yearRange').textContent='Año lunar '+fS(cell(0))+' '+anchor.getFullYear()+'  →  '+fS(cell(363))+' '+cell(363).getFullYear()+'  + día fuera del tiempo';
+  document.getElementById('tPh').textContent=realPh.e;
+  if(isFree){document.getElementById('tNm').textContent='Día fuera del tiempo';document.getElementById('tMeta').textContent=fL(today);document.getElementById('tEn').textContent='Descanso total · reset anual';}
+  else{document.getElementById('tNm').textContent='Luna '+(cL+1)+' — '+NAMES[cL];document.getElementById('tMeta').textContent='Día '+cD+' de 28 · Semana '+cW+' · '+fL(today);document.getElementById('tEn').textContent=WEEKS[cW-1].name.split('· ')[1]+' — '+WEEKS[cW-1].txt;}
+  const yEl=document.getElementById('year');
+  [[0,1,2,3],[4,5,6,7],[8,9,10,11,12]].forEach(grp=>{
+    const row=document.createElement('div');row.className='row '+(grp.length===5?'r5':'r4');
+    grp.forEach(li=>{
+      const st=cell(li*28),en=cell(li*28+27);let cells='';
+      for(let d=0;d<28;d++){
+        const w=Math.floor(d/7);const gd=cell(li*28+d);
+        const isT=(!isFree&&li===cL&&(d+1)===cD);
+        let tip='';
+        if(isT){tip=`<div class='tip'><b>Hoy · ${fS(today)}</b><div class='r'>Luna ${cL+1} — ${NAMES[cL]}</div><div class='r'>Día ${cD} de 28 · Semana ${cW}</div><div class='r'>${WEEKS[cW-1].name.split('· ')[1]}: ${WEEKS[cW-1].txt}</div><div class='r'>${realPh.e} Luna real: ${realPh.n}</div></div>`;}
+        cells+=`<div class='cell w${w+1}${isT?' today':''}' title='${fL(gd)} · Semana ${w+1}'>${d+1}${tip}</div>`;
+      }
+      const c=document.createElement('div');c.className='moon';
+      c.innerHTML=`<h3>Luna ${li+1} · ${NAMES[li]}</h3><div class='mo-sub'>${fS(st)} – ${fS(en)}${ANCHORS[li]?' · '+ANCHORS[li]:''}</div><div class='grid'>${cells}</div>`;
+      row.appendChild(c);
+    });
+    yEl.appendChild(row);
+  });
+  const fd=cell(364);const free=document.createElement('div');free.className='freeday';
+  free.innerHTML=`<div class='fc'>✶</div><div class='ft'><b style='color:#ffd0de'>Día fuera del tiempo</b> · ${fL(fd)} — sin tareas: descanso total y reset anual${isFree?'  ·  ¡es HOY!':''}</div>`;
+  yEl.appendChild(free);
+  let hl='<h2>☾ Las 13 Lunas — cómo aprovecharlas</h2>';
+  SEASONS.forEach(s=>{hl+=`<div class='season'>${s.t}</div>`;s.ls.forEach(li=>{hl+=`<div class='item'><span class='dot' style='background:${s.col}'></span><div><b>Luna ${li+1} · ${NAMES[li]}</b><br><span style='color:#9aa3b8'>${HINT[li]}</span></div></div>`;});});
+  hl+=`<div class='item'><span class='dot' style='background:var(--free)'></span><div><b>Día fuera del tiempo</b><br><span style='color:#9aa3b8'>Descanso total, celebración y reset anual.</span></div></div>`;
+  document.getElementById('lgLunas').innerHTML=hl;
+  let hw='<h2>📆 Las 4 semanas de cada luna</h2>';
+  WEEKS.forEach(w=>{hw+=`<div class='item'><span class='dot' style='background:${w.col}'></span><div><b>${w.name}</b><br><span style='color:#9aa3b8'>${w.phase}</span><br><span style='color:#c7cddd'>${w.txt}</span></div></div>`;});
+  hw+=`<div class='item'><span class='dot' style='background:var(--free)'></span><div><b>Día libre (fuera del tiempo)</b><br><span style='color:#9aa3b8'>El día especial al cierre del año, sin obligaciones.</span></div></div>`;
+  document.getElementById('lgWeeks').innerHTML=hw;
 })();
 </script>
 </body>
